@@ -9,25 +9,33 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_URL=jdbc:postgresql://db:5432/postgres
+      SPRING_APPLICATION_JSON: '{
+              "spring.datasource.url"  : "jdbc:postgresql://db:5432/filestore_db",
+              "spring.datasource.username" : "postgres",
+              "spring.datasource.password" : "postgres",
+              "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.PostgreSQLDialect",
+              "spring.jpa.hibernate.ddl-auto" : "update"
+            }'
     depends_on:
       db:
         condition: service_healthy
-
   db:
-    container_name: "postgresdb"
+    container_name: "db"
     image: postgres:16
     ports:
-      - "5432:5432"
+      - "8001:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: filestore_db
+      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - pgdata:/var/lib/postgresql/data/pgdata
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 2s
       retries: 2
+
+volumes:
+  pgdata:
