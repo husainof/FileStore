@@ -18,7 +18,7 @@ public class File {
     private int id;
 
     @Column(name = "data")
-    private String data;
+    private byte[] data;
 
     @Column(name = "title")
     private String title;

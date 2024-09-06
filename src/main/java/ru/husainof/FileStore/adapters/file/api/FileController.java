@@ -1,6 +1,7 @@
 package ru.husainof.FileStore.adapters.file.api;
 
 
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import ru.husainof.FileStore.domain.file.models.File;
 import ru.husainof.FileStore.domain.file.services.FileService;
 import ru.husainof.FileStore.utils.AppErrorResponse;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,16 +35,16 @@ public class FileController {
         return this.convertToDTO(fileService.findById(id));
     }
 
-    @GetMapping
-    public List<FileDTO> findAllOrderByCreationDate() {
-        return this.fileService.findAllOrderByCreationDate()
+    @GetMapping(params = { "page", "size" })
+    public List<FileDTO> findAllOrderByCreationDate(@RequestParam("page") int page, @RequestParam("size") int size) {
+        return this.fileService.findAllOrderByCreationDate(page, size)
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     @PostMapping
-    public int createFile(@RequestBody @Validated FileDTO fileDTO) {
+    public int createFile(@Valid @RequestBody FileDTO fileDTO) {
         var id = this.fileService.save(this.convertToFile(fileDTO));
         return id;
     }
@@ -51,7 +53,11 @@ public class FileController {
     private ResponseEntity<AppErrorResponse> handleNotFoundException(
             FileNotFoundException fileNotFoundException
     ) {
-        var response = new AppErrorResponse();
+        var response = new AppErrorResponse(
+                new Date(),
+                HttpStatus.NOT_FOUND.value(),
+                List.of("file not found")
+        );
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 

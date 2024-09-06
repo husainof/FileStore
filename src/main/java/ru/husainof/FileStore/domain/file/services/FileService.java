@@ -1,5 +1,7 @@
 package ru.husainof.FileStore.domain.file.services;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.husainof.FileStore.domain.file.errors.FileNotFoundException;
@@ -17,8 +19,13 @@ public class FileService {
         this.fileRepository = fileRepository;
     }
 
-    public List<File> findAllOrderByCreationDate() {
-        return  this.fileRepository.findAllByOrderByCreationDateAsc();
+    public List<File> findAllOrderByCreationDate(int page, int size) {
+        return  this.fileRepository.findAll(
+                PageRequest.of(
+                        page,
+                        size,
+                        Sort.by(Sort.Direction.ASC, "creationDate"))
+        ).stream().toList();
     }
 
     public File findById(int id) {
