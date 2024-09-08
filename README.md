@@ -1,144 +1,93 @@
-# Тестовое заданике - микроскервис FileService
+# File Storage Microservice
 ___
- 
+## Описание
 
-## Описание решения
-___
+Этот микросервис реализует хранилище для различных файлов и их атрибутов. Он предоставляет HTTP API, позволяющее создавать и получать файлы в формате JSON. Микросервис разработан на Java с использованием Spring Boot, обернут в docker-контейнер и подключается к контейнеру PostgreSQL для хранения данных.
+Основные функции
 
-Микросервис выполняет роль хранилища различных файлов и их атрибутов.
-Он предоставляет HTTP API для создания и получения файлов вместе с их атрибутами.
-Для хранения данных используется база данных PostgreSQL.
-
-Технологический стек:
-+ Backend: Java, Spring Boot, Spring Data JPA
-+ База данных: PostgreSQL
-+ Тестирование: JUnit
-+ Контейнеризация: Docker
-+ Формат данных: JSON
-
-## Реализованные API-методы
-___
-1. **Создание файла**:
-    - **Входной JSON**:
-      ```json
-      {
-        "title": "example",
-        "creation_date": "2024-01-01T12:00:00",
-        "description": "Example file",
-        "filedata": "SGVsbG8gd29ybGQh"  
-      }
-      ```
-    - **Выходной JSON**:
-      ```json
-      {
-        "id": 1
-      }
-      ```
-
-2. **Получение файла по id**:
-    - **Входной параметр**: `id` файла
-    - **Выходной JSON**:
-      ```json
-      {
-        "title": "example.txt",
-        "creation_date": "2023-01-01T12:00:00",
-        "description": "Example file",
-        "filedata": "SGVsbG8gd29ybGQh"   
-      }
-      ```
-
-3. **Получение списка файлов отсортированных по дате и времени создания** :
-    - **Входные параметры**: отсутствуют
-    - **Выходной JSON**:
-    - ```json
-      [
-        {
-          "fileData": "SGVsbG8gd29ybGQh",
-          "title": "example2",
-          "creationDate": "2024-01-01T12:00:00",
-          "description": "Second Example file"
-        },
-        {  
-          "fileData": "SGVsbG8gd29ybGQh",
-          "title": "example3",
-          "creationDate": "2024-02-01T12:00:00",
-          "description": "Third Example file"
-        },
-        {
-          "fileData": "SGVsbG8gd29ybGQh",
-          "title": "example1",
-          "creationDate": "2024-02-01T13:00:00",
-          "description": "First Example file"
-        }
-      ]
-    ```
-### Дополнительные возможности
-
-- Тестирование с использованием JUnit.
-- Docker-контейнеризация микросервиса вместе с базой данных PostgreSQL.
+- Создание файла: принимает файл в формате base64 и его атрибуты (название, дата и время отправки, краткое описание) и возвращает уникальный идентификатор созданного файла.
+- Получение файла: по уникальному идентификатору возвращает файл и его атрибуты.
+- Получение списка всех файлов с поддержкой пагинации и сортировки по времени создания.
 
 ## Инструкция по запуску приложения
-___
+### Требования:
 
-### Требования
+- Docker (для контейнеризации);
+- Docker compose (для запуска бд в контейнере).
 
-- Docker
-- Docker Compose
+### Запуск с Docker
 
-### Шаги для запуска
+Склонируйте git-репозиторий:
+```declarative
+git clone https://github.com/husainof/FileStore.git
+```
+Запустите `docker-compose` в корне приложения:
+```declarative
+docker compose up
+```
+Микросервис будет доступен на порту 8080.
 
-1. **Клонируйте репозиторий:**
+## Примеры тестовых запросов
+### 1. Создание файла
 
-   ```shell
-   git clone https://github.com/TBagirov/GreenatomTestTask.git
-   cd GreenatomTestTask
+Запрос:
+```http
 
-2. **Соберите и запустите Docker-контейнеры:**
-   
-   ```shell
-   docker-compose up --build
-   ```
-   эта команда создаст и запустит контейнеры для микросервиса и базы данных PostgreSQL.
+POST /api/files
+Content-Type: application/json
 
-3. **Доступ к api**
-   После запуска контейнеров, микросервис будет доступен по адресу `http://localhost:8080`
+{
+    "file": "data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==",
+    "title": "Document Title",
+    "creation_date": "2024-09-03T14:49:00",
+    "description": "Description of the document"
+}
+```
+Ответ:
+```json
+1
+```
 
-## Примеры тестовых запросов для проверки API-методов
-___
-+ ### Создание файла
-   Адрес: `http://localhost:8080/api/file_store` <br>
-   HTTP-метод: `POST` <br>
-   Несколько примеров тела запроса(для дальнейшей проверки получения всех файлов с сортировкой):  
-   ```json
-  {
-  "title": "example1",
-  "creationDate": "2024-02-01T13:00:00",
-  "description": "First Example file",
-  "fileData": "Rmlyc3QgSGVsbG8gV29ybGQ="  
-  } 
-  ```
-   
-  ```json  
-  {
-  "title": "example2",
-  "creationDate": "2024-01-01T12:00:00",
-  "description": "Second Example file",
-  "fileData": "U2Vjb25kIEhlbGxvIFdvcmxk"  
-  }
-  ```
-  ```json  
-  {
-  "title": "example3",
-  "creationDate": "2024-02-01T12:00:00",
-  "description": "Third Example file",
-  "fileData": "VGhpcmQgSGVsbG8gV29ybGQ="  
-  }
-  ```
-  *При отсутствии нужного поля в теле запроса предусмотрен json c exception* <br>
-+ ### Получение файла по id
-  Адрес: `http://localhost:8080/api/file_store/{id}` <br>
-  HTTP-метод: `GET` <br>
-  *При указании несуществующего id предусмотрен json c exception* <br>
-+ ### Получение списка файлов отсортированных по дате и времени создания
-  Адрес: `http://localhost:8080/api/file_store` <br>
-  HTTP-метод: `GET` <br> 
+### 2. Получение файла
+
+Запрос:
+```http
+GET /api/files/{id}
+```
+
+Ответ:
+```json
+
+{
+    "data": "data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==",
+    "title": "Document Title",
+    "creation_date": "2024-09-03T14:49:00",
+    "description": "Description of the document"
+}
+```
+
+### 3. Получение постраничного списка файлов
+
+Запрос:
+```http
+
+GET /api/files?page=0&size=2
+```
+
+Ответ:
+```json
+[
+    {
+      "data": "data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==",
+      "title": "Document Title 1",
+      "creation_date": "2024-09-01T14:49:00",
+      "description": "Description 1"
+    },
+    {
+      "data": "data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==",
+      "title": "Document Title 2",
+      "creation_date": "2024-09-02T14:49:00",
+      "description": "Description 2"
+    }
+]
+```
