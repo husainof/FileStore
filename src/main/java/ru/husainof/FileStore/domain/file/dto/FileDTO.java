@@ -9,12 +9,13 @@ import java.util.Date;
 
 @Data
 public class FileDTO {
+
     @NotNull
     @JsonProperty("data")
     private byte[] data;
 
     @JsonProperty("title")
-    @NotEmpty()
+    @NotEmpty
     private String title;
 
     @JsonProperty("creation_date")
@@ -22,6 +23,6 @@ public class FileDTO {
     private Date creationDate;
 
     @JsonProperty("description")
-    @NotNull
+    @NotEmpty
     private String description;
 }

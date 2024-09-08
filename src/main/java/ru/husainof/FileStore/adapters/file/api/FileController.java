@@ -2,11 +2,11 @@ package ru.husainof.FileStore.adapters.file.api;
 
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.husainof.FileStore.domain.file.dto.FileDTO;
 import ru.husainof.FileStore.domain.file.errors.FileNotFoundException;
@@ -32,21 +32,26 @@ public class FileController {
 
     @GetMapping("/{id}")
     public FileDTO findOne(@PathVariable int id) {
-        return this.convertToDTO(fileService.findById(id));
+        return this.convertToDTO(fileService.findOne(id));
     }
 
-    @GetMapping(params = { "page", "size" })
-    public List<FileDTO> findAllOrderByCreationDate(@RequestParam("page") int page, @RequestParam("size") int size) {
-        return this.fileService.findAllOrderByCreationDate(page, size)
+    @GetMapping
+    public List<FileDTO> getPageOrderByCreationDate(
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) int size
+    ) {
+    return this.fileService.getPageOrderByCreationDate(page, size)
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     @PostMapping
-    public int createFile(@Valid @RequestBody FileDTO fileDTO) {
-        var id = this.fileService.save(this.convertToFile(fileDTO));
-        return id;
+    public ResponseEntity<Integer> createFile(
+           @Valid @RequestBody FileDTO fileDTO
+    ) {
+        var id = fileService.save(this.convertToFile(fileDTO));
+        return new ResponseEntity<>(id, HttpStatus.CREATED);
     }
 
     @ExceptionHandler
