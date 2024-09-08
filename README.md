@@ -22,8 +22,9 @@ ___
 git clone https://github.com/husainof/FileStore.git
 ```
 Опционально, если нужно подтянуть внесенные изменения в коде:
-    - Соберить проект через IDE.
-    - Запустите команду `./mvnw package`, в папке target скомпилируется jar-файл.
+- Соберить проект через IDE.
+- Запустите команду `./mvnw package`, в папке target скомпилируется jar-файл.
+  
 Запустите `docker-compose` в корне приложения:
 ```declarative
 docker compose up
